@@ -1,3 +1,8 @@
+import os 
+
+DIRNAME = os.path.dirname(os.path.abspath(__file__))
+IMAGES_DIR = os.path.join(DIRNAME, 'images')
+
 OPENCV_METHODS = {
     'CV_COMP_CORREL': 1,
     'CV_COMP_CHISQR': 2,
