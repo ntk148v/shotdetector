@@ -7,6 +7,7 @@ import constants
 import hist_handler
 import adaptive_threshold
 
+from PIL import Image
 
 class ShotBoundaryDetector(object):
 
@@ -28,6 +29,7 @@ class ShotBoundaryDetector(object):
         self.video_path = video_path
         self.frame_queue = FrameQueue()
         self.diff_queue = DiffQueue()
+        self.list_frame = []
 
     def capture_video(self):
         """Capture source video
@@ -76,6 +78,9 @@ class ShotBoundaryDetector(object):
             if not ret:
                 print("No more frame")
                 break
+
+            self.list_frame.append(frame)
+
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             frame_info = self.get_frame_info(
@@ -151,6 +156,8 @@ class ShotBoundaryDetector(object):
 
             sframe_id = boundary_queue.get()[i]['next_frame']
             eframe_id = boundary_queue.get()[i + 1]['prev_frame']
-            print("Key Frame : {}" . format(
-                self.calc_keyframe(sframe_id, eframe_id)))
+            index = int(self.calc_keyframe(sframe_id, eframe_id))
+            print("Key Frame : {}" . format(index)))
+            im = Image.fromarray(self.list_frame[int(index)])
+            im.save("images/keyframe_{}.jpg". format(int(index)))
             i += 1
