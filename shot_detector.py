@@ -1,6 +1,7 @@
 import cv2
 import copy
 import math
+import os
 
 from queues import Queue, FrameQueue, DiffQueue
 import constants
@@ -8,6 +9,7 @@ import hist_handler
 import adaptive_threshold
 
 from PIL import Image
+
 
 class ShotBoundaryDetector(object):
 
@@ -157,7 +159,12 @@ class ShotBoundaryDetector(object):
             sframe_id = boundary_queue.get()[i]['next_frame']
             eframe_id = boundary_queue.get()[i + 1]['prev_frame']
             index = int(self.calc_keyframe(sframe_id, eframe_id))
-            print("Key Frame : {}" . format(index)))
+            print("Key Frame : {}" . format(index))
             im = Image.fromarray(self.list_frame[int(index)])
-            im.save("images/keyframe_{}.jpg". format(int(index)))
+            if not (os.path.exists(constants.IMAGES_DIR) or
+                    os.path.isdir(constants.IMAGES_DIR)):
+                os.makedirs(constants.IMAGES_DIR)
+
+            im.save(
+                constants.IMAGES_DIR + "/keyframe_{}.jpg". format(int(index)))
             i += 1
