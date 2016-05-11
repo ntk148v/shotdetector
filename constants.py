@@ -2,6 +2,7 @@ import os
 
 DIRNAME = os.path.dirname(os.path.abspath(__file__))
 IMAGES_DIR = os.path.join(DIRNAME, 'images')
+SHOTS_DIR = os.path.join(DIRNAME, 'shots')
 
 OPENCV_METHODS = {
     'CV_COMP_CORREL': 1,
