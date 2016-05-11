@@ -1,17 +1,9 @@
-"""Summary
-
-Attributes:
-    fourcc (TYPE): Description
-    fps (TYPE): Description
-    framesize (TYPE): Description
-"""
 import cv2
 import copy
 import math
 import os
 
 from queues import Queue, FrameQueue, DiffQueue
-from shot_writter import ShotWritter
 import constants
 import hist_handler
 import adaptive_threshold
@@ -47,7 +39,6 @@ class ShotBoundaryDetector(object):
         self.frame_queue = FrameQueue()
         self.diff_queue = DiffQueue()
         self.frames = []
-        self.swritter = ShotWritter()
 
     def capture_video(self):
         """Capture source video
@@ -106,7 +97,7 @@ class ShotBoundaryDetector(object):
             print("Everything is fine")
 
         self.shot_info(cap)
-        
+
         while(cap.isOpened()):
             print("Read frame from video...")
             ret, frame = cap.read()
@@ -218,11 +209,12 @@ class ShotBoundaryDetector(object):
             os.makedirs(constants.SHOTS_DIR)
         path = constants.SHOTS_DIR + \
             "/{}_{}.avi" . format(int(sframe_id), int(eframe_id))
-        
-        self.swritter.set_out(path, fourcc, fps, framesize)
+
+        out = cv2.VideoWriter(path, fourcc, fps, framesize)
 
         for frame in self.frames[int(sframe_id):int(eframe_id)]:
-            self.swritter.write(frame)
+            out.write(frame)
+        out.release()
 
     def save(self, boundary_queue):
         """Summary
@@ -246,8 +238,6 @@ class ShotBoundaryDetector(object):
             self.save_shot(sframe_id, eframe_id)
 
             i += 1
-
-        self.swritter.release()
 
     def detect(self):
         """Detect Boundary
