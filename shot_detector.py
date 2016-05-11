@@ -69,7 +69,7 @@ class ShotBoundaryDetector(object):
         global fps, fourcc, framesize
         fps = cap.get(cv2.CAP_PROP_FPS)
         fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
-        # fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        # fourcc = int(cv2.VideoWriter_fourcc(*'XVID'))
         framesize = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
                      int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
@@ -106,7 +106,7 @@ class ShotBoundaryDetector(object):
             print("Everything is fine")
 
         self.shot_info(cap)
-
+        
         while(cap.isOpened()):
             print("Read frame from video...")
             ret, frame = cap.read()
@@ -213,17 +213,16 @@ class ShotBoundaryDetector(object):
         Returns:
             TYPE: Description
         """
+        if not (os.path.exists(constants.SHOTS_DIR) or
+                os.path.isdir(constants.SHOTS_DIR)):
+            os.makedirs(constants.SHOTS_DIR)
+        path = constants.SHOTS_DIR + \
+            "/{}_{}.avi" . format(int(sframe_id), int(eframe_id))
+        
+        self.swritter.set_out(path, fourcc, fps, framesize)
+
         for frame in self.frames[int(sframe_id):int(eframe_id)]:
-            if not (os.path.exists(constants.SHOTS_DIR) or
-                    os.path.isdir(constants.SHOTS_DIR)):
-                os.makedirs(constants.SHOTS_DIR)
-
-            path = constants.SHOTS_DIR + \
-                "/{}_{}.avi" . format(int(sframe_id), int(eframe_id))
-
-            self.swritter.set_out(path, fourcc, fps, framesize)
             self.swritter.write(frame)
-        self.swritter.release()
 
     def save(self, boundary_queue):
         """Summary
@@ -247,6 +246,8 @@ class ShotBoundaryDetector(object):
             self.save_shot(sframe_id, eframe_id)
 
             i += 1
+
+        self.swritter.release()
 
     def detect(self):
         """Detect Boundary
