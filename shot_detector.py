@@ -69,6 +69,7 @@ class ShotBoundaryDetector(object):
         global fps, fourcc, framesize
         fps = cap.get(cv2.CAP_PROP_FPS)
         fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+        # fourcc = cv2.VideoWriter_fourcc(*'MP4V')
         framesize = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
                      int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
@@ -104,6 +105,8 @@ class ShotBoundaryDetector(object):
         else:
             print("Everything is fine")
 
+        self.shot_info(cap)
+
         while(cap.isOpened()):
             print("Read frame from video...")
             ret, frame = cap.read()
@@ -122,8 +125,6 @@ class ShotBoundaryDetector(object):
                 hist_handler.calc_hist([gray], [0], None, [256], [0, 256])
             )
 
-            self.shot_info(cap)
-
             # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             # frame_info = self.get_frame_info(
             #     cap.get(cv2.CAP_PROP_POS_FRAMES),
@@ -140,6 +141,7 @@ class ShotBoundaryDetector(object):
         """Put hist diff to queue
         """
         self.get_frames()
+        print("{},{},{}" . format(fps, fourcc, framesize))
         queue = copy.deepcopy(self.frame_queue)
 
         while(1):

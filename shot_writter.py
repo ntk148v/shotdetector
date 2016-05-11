@@ -25,7 +25,7 @@ class ShotWritter(object):
         Returns:
             TYPE: Description
         """
-        self.out = cv2.VideoWriter(path, fourcc, fps, frame_size)
+        self.out = cv2.VideoWriter(path, fourcc, fps, frame_size, False)
 
     def write(self, frame):
         """Summary
