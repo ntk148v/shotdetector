@@ -2,3 +2,5 @@
 __pycache__/
 images/
 shots/
+*.mp4
+*.avi
