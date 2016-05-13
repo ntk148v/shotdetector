@@ -2,6 +2,7 @@ import cv2
 import copy
 import math
 import os
+import logging
 
 from queues import Queue, FrameQueue, DiffQueue
 import constants
@@ -14,6 +15,7 @@ from PIL import Image
 fps = None
 fourcc = None
 framesize = None
+logger = logging.getLogger(__name__)
 
 
 class ShotBoundaryDetector(object):
@@ -49,18 +51,14 @@ class ShotBoundaryDetector(object):
         return cv2.VideoCapture(self.video_path)
 
     def shot_info(self, cap):
-        """Summary
+        """Set shot information
 
         Args:
-            cap (TYPE): Description
-
-        Returns:
-            TYPE: Description
+            cap (cv2.VideoCapture): 
         """
         global fps, fourcc, framesize
         fps = cap.get(cv2.CAP_PROP_FPS)
         fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
-        # fourcc = int(cv2.VideoWriter_fourcc(*'XVID'))
         framesize = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
                      int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
@@ -91,38 +89,30 @@ class ShotBoundaryDetector(object):
         """
         cap = self.capture_video()
         if not cap.isOpened():
-            raise IOError(" Something went wrong! Please check \
+            logger.exception(" Something went wrong! Please check \
                            your video path again!")
+            raise IOError
         else:
-            print("Everything is fine")
+            logger.info("Everything is fine")
 
         self.shot_info(cap)
 
         while(cap.isOpened()):
-            print("Read frame from video...")
+            logger.info("Read frame from video...")
             ret, frame = cap.read()
 
             if not ret:
-                print("No more frame")
+                logger.info("No more frame")
                 break
 
             self.frames.append(frame)
-
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
             frame_info = self.get_frame_info(
                 cap.get(cv2.CAP_PROP_POS_FRAMES),
                 cap.get(cv2.CAP_PROP_POS_MSEC),
                 hist_handler.calc_hist([gray], [0], None, [256], [0, 256])
             )
-
-            # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            # frame_info = self.get_frame_info(
-            #     cap.get(cv2.CAP_PROP_POS_FRAMES),
-            #     cap.get(cv2.CAP_PROP_POS_MSEC),
-            #     hist_handler.calc_hist([hsv], [0], None, [256], [0, 256])
-            # )
-
+            logger.info("Put frame info to queue...")
             self.frame_queue.enqueue(frame_info)
 
         cap.release()
@@ -159,28 +149,25 @@ class ShotBoundaryDetector(object):
         del queue
 
     def calc_keyframe(self, sframe_id, eframe_id):
-        """Summary
+        """Calculate keyframe
 
         Args:
-            sframe_id (TYPE): Description
-            eframe_id (TYPE): Description
+            sframe_id (float): start frame of shot id
+            eframe_id (float): end frame of shot id
 
         Returns:
-            TYPE: Description
+            float: key frame - middle frame of shot id.
         """
         mframe_id = sframe_id + \
             math.floor(abs(eframe_id - sframe_id) / 2)
         return mframe_id
 
     def save_keyframe(self, sframe_id, eframe_id):
-        """Summary
+        """Save keyframe
 
         Args:
-            sframe_id (TYPE): Description
-            eframe_id (TYPE): Description
-
-        Returns:
-            TYPE: Description
+            sframe_id (float): start frame of shot id
+            eframe_id (float): end frame of shot id
         """
         index = int(self.calc_keyframe(sframe_id, eframe_id))
         print("Key Frame : {}" . format(index))
@@ -189,41 +176,39 @@ class ShotBoundaryDetector(object):
 
         if not (os.path.exists(constants.IMAGES_DIR) or
                 os.path.isdir(constants.IMAGES_DIR)):
+            logger.info("Create keyframe folder")
             os.makedirs(constants.IMAGES_DIR)
 
         im.save(
             constants.IMAGES_DIR + "/keyframe_{}.jpg". format(int(index)))
+        logger.info(
+            "Save keyframe of shot {} - {}" . format(sframe_id, eframe_id))
 
     def save_shot(self, sframe_id, eframe_id):
-        """Summary
+        """Save shot
 
         Args:
-            sframe_id (TYPE): Description
-            eframe_id (TYPE): Description
-
-        Returns:
-            TYPE: Description
+            sframe_id (float): start frame of shot id
+            eframe_id (float): end frame of shot id
         """
         if not (os.path.exists(constants.SHOTS_DIR) or
                 os.path.isdir(constants.SHOTS_DIR)):
+            logger.info("Create shot folder")
             os.makedirs(constants.SHOTS_DIR)
         path = constants.SHOTS_DIR + \
             "/{}_{}.avi" . format(int(sframe_id), int(eframe_id))
-
         out = cv2.VideoWriter(path, fourcc, fps, framesize)
-
         for frame in self.frames[int(sframe_id):int(eframe_id)]:
             out.write(frame)
+        logger.info(
+            "Save keyframe of shot {} - {}" . format(sframe_id, eframe_id))
         out.release()
 
     def save(self, boundary_queue):
-        """Summary
+        """Save both keyframe and shot 
 
         Args:
-            boundary_queue (TYPE): Description
-
-        Returns:
-            TYPE: Description
+            boundary_queue (list): boundary queue
         """
         i = 0
 
@@ -233,7 +218,6 @@ class ShotBoundaryDetector(object):
 
             sframe_id = boundary_queue.get()[i]['next_frame']
             eframe_id = boundary_queue.get()[i + 1]['prev_frame']
-
             self.save_keyframe(sframe_id, eframe_id)
             self.save_shot(sframe_id, eframe_id)
 
@@ -243,14 +227,17 @@ class ShotBoundaryDetector(object):
         """Detect Boundary
         """
         self.put_diff_queue()
+        logger.info("Set threshold")
         self.threshold = adaptive_threshold.calc_threshold(
             self.diff_queue, constants.THRESHOLD_CONST)
         boundary_queue = Queue()
 
         for diff in self.diff_queue.get():
             if(diff['value'] >= self.threshold):
-                print("Shot Boundary Detected : {} - {}"
-                      . format(diff['prev_frame'], diff['next_frame']))
+                logger.info("Shot boundary detected : {} - {}"
+                            . format(diff['prev_frame'], diff['next_frame']))
                 boundary_queue.enqueue(diff)
+            else:
+                logger.info("No shot boundary detected")
 
         self.save(boundary_queue)
