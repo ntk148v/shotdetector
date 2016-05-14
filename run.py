@@ -1,4 +1,4 @@
-from shot_detector import ShotBoundaryDetector
+from app import shot_detector.ShotBoundaryDetector
 from flask import Flask, render_template, request
 app = Flask(__name__)
 
@@ -15,7 +15,3 @@ def home():
 if __name__ == '__main__':
     app.debug = True
     app.run(debug = True)
-
-# if __name__ == '__main__':
-#     detector = ShotBoundaryDetector('test.avi')
-#     detector.detect()
