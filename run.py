@@ -1,5 +1,6 @@
 from app2.shot_detector import ShotBoundaryDetector
 import config
+import logging
 
 import os
 from flask import Flask, render_template, request, redirect, url_for
@@ -7,6 +8,8 @@ from werkzeug import secure_filename
 
 
 app = Flask(__name__)
+logger = logging.getLogger(__name__)
+
 app.config['UPLOAD_DIR'] = config.UPLOAD_DIR
 
 
@@ -27,11 +30,14 @@ def upload():
     if(request.method == "POST"):
         file = request.files['file']
         if file and allowed_file(file.filename):
+            logger.info("{}" . format(file.filename))
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
+            file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
+            return redirect(url_for('predetect',
                                     filename=filename))
-    return render_template(config.TEMPLATE_DIR + "predetect.html")
+
+    # return render_template("fail.html")
+    return "DONE"
 
 
 @app.route("/")

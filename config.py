@@ -12,5 +12,5 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates/')
 STATIC_DIR = os.path.join(BASE_DIR, 'static/')
 
 # Define the upload directory & support video format
-UPLOAD_DIR = '/path/to/the/uploads'
+UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads/')
 ALLOWED_EXTENSIONS = set(['mov', 'avi', 'mp4', 'webm'])
