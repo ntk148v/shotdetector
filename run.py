@@ -31,12 +31,12 @@ def upload():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('uploaded_file',
                                     filename=filename))
-    return "Done!"
+    return render_template(config.TEMPLATE_DIR + "/predetect.html")
 
 
 @app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template(config.TEMPLATE_DIR + '/upload.html')
 
 if __name__ == '__main__':
     app.debug = True
