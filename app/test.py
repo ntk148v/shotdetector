@@ -243,10 +243,8 @@ class ShotBoundaryDetector(object):
                 print("No more frame")
                 break
             i = i + 1
-            if i >= sframe_id:
+            if i >= sframe_id and boundary_queue.size() != 0:
                 out.release()
-                if boundary_queue.size() == 0:
-                    break
                 boundary = boundary_queue.dequeue()
                 sframe_id = int(boundary['next_frame'])
                 path = constants.SHOTS_DIR + "/shot_{}.avi" . format(i)
