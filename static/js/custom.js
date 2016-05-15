@@ -1,26 +1,36 @@
-//DropzoneJS snippet - js
+$("#uploadFile").change(function() {
+    var formData = new FormData(this);
+    formData.append('file', this.files[0]);
 
-$.getScript('http://cdnjs.cloudflare.com/ajax/libs/dropzone/3.8.4/dropzone.min.js',function(){
-  // instantiate the uploader
-  $('div#file-dropzone').dropzone({ 
-    url: "/upload",
-    maxFilesize: 100,
-    paramName: "uploadfile",
-    maxThumbnailFilesize: 5,
-    init: function() {
-      
-      this.on('success', function(file, json) {
-      });
-      
-      this.on('addedfile', function(file) {
-        
-      });
-      
-      this.on('drop', function(file) {
-        alert('file');
-      }); 
-    }
-  });
+    $.tmpl($("#fileUploadProgressTemplate")).appendTo( "#files" );
+    $("#fileUploadError").addClass("hide");
+    
+    $.ajax({
+        url: '',
+        type: 'POST',
+        xhr: function() {
+            var xhr = $.ajaxSettings.xhr();
+            if (xhr.upload) {
+                xhr.upload.addEventListener('progress', function(evt) {
+                    var percent = (evt.loaded / evt.total) * 100;
+                    $("#files").find(".progress-bar").width(percent + "%");
+                }, false);
+            }
+            return xhr;
+        },
+        success: function(data) {
+            $("#files").children().last().remove();
+            $.tmpl($("#fileUploadProgressTemplate"), data).appendTo( "#files" );
+            $("#uploadFile").closest("form").trigger("reset");
+        },
+        error: function() {
+            $("#fileUploadError").removeClass("hide").text("An error occured!");
+            $("#files").children().last().remove();
+            $("#uploadFile").closest("form").trigger("reset");
+        },
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false
+    }, 'json');
 });
-
-$(document).ready(function() {});
