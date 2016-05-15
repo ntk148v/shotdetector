@@ -209,58 +209,6 @@ class ShotBoundaryDetector(object):
         cap.release()
         cv2.destroyAllWindows()
 
-    def save_shot(self, boundary_queue):
-        """Summary
-        Args:
-            boundary_queue
-
-        """
-        if not (os.path.exists(constants.SHOTS_DIR) or
-                os.path.isdir(constants.SHOTS_DIR)):
-            os.makedirs(constants.SHOTS_DIR)
-        path = constants.SHOTS_DIR + \
-            "/{}_{}.avi" . format(int(sframe_id), int(eframe_id))
-
-        out = cv2.VideoWriter(path, fourcc, fps, framesize)
-
-        for frame in self.frames[int(sframe_id):int(eframe_id)]:
-            out.write(frame)
-        out.release()
-
-        ##### new code ####
-        cap = self.capture_video()
-        if not cap.isOpened():
-            raise IOError(" Something went wrong! Please check \
-                           your video path again!")
-        else:
-            print("Everything is fine to save keyframes")
-
-        self.shot_info(cap)
-        i = 1
-
-        boundary  = boundary_queue.dequeue()
-        if boundary is None:
-            return
-
-        sframe_id = boundary_queue.get()[i]['next_frame']
-
-        while(cap.isOpened()):
-            ret, frame = cap.read()
-
-            if not ret:
-                break
-
-            if i < sframe_id:
-                # write frame to video
-            else:
-                # write video, open new video and reset sframe_id
-
-            i = i + 1
-
-        cap.release()
-        cv2.destroyAllWindows()
-
-
     def detect(self):
         """Detect Boundary
         """
