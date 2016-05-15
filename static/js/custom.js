@@ -2,12 +2,16 @@ $("#uploadFile").change(function() {
     var formData = new FormData(this);
     formData.append('file', this.files[0]);
 
-    $.tmpl($("#fileUploadProgressTemplate")).appendTo( "#files" );
+    $.tmpl($("#fileUploadProgressTemplate")).appendTo("#files");
     $("#fileUploadError").addClass("hide");
-    
+
     $.ajax({
-        url: '',
+        url: '/',
         type: 'POST',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
         xhr: function() {
             var xhr = $.ajaxSettings.xhr();
             if (xhr.upload) {
@@ -20,7 +24,7 @@ $("#uploadFile").change(function() {
         },
         success: function(data) {
             $("#files").children().last().remove();
-            $.tmpl($("#fileUploadProgressTemplate"), data).appendTo( "#files" );
+            $.tmpl($("#fileUploadProgressTemplate"), data).appendTo("#files");
             $("#uploadFile").closest("form").trigger("reset");
         },
         error: function() {
@@ -28,9 +32,5 @@ $("#uploadFile").change(function() {
             $("#files").children().last().remove();
             $("#uploadFile").closest("form").trigger("reset");
         },
-        data: formData,
-        cache: false,
-        contentType: false,
-        processData: false
-    }, 'json');
+    });
 });

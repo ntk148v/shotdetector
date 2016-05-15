@@ -1,9 +1,9 @@
-# from app.shot_detector import ShotBoundaryDetector
+from app.shot_detector import ShotBoundaryDetector
 import config
 import logging
 
 import os
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for
 from werkzeug import secure_filename
 
 
@@ -18,15 +18,11 @@ def allowed_file(filename):
         filename.rsplit('.', 1)[1] in config.ALLOWED_EXTENSIONS
 
 
-# @app.route("/detect", methods=['POST'])
-# def detect():
-#     detector = ShotBoundaryDetector(request.form['url'])
-#     detector.detect()
-#     return "Done!!"
-
-@app.route("/predetect/<filename>")
-def predetect(filename):
-    return send_from_directory(app.config['UPLOAD_DIR'], filename)
+@app.route("/detect/<filename>")
+def detect(filename):
+    detector = ShotBoundaryDetector(config.UPLOAD_DIR + filename)
+    detector.detect()
+    return render_template('detect.html')
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -37,7 +33,7 @@ def home():
             logger.info("{}" . format(file.filename))
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-            return redirect(url_for('predetect',
+            return redirect(url_for('detect',
                                     filename=filename))
     return render_template('upload.html')
 

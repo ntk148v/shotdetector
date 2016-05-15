@@ -1,32 +1,35 @@
 {% extends "layout.html" %}
 {% block content %}
 	<div class="container-fluid">
-		<div class="row">
-			<div class="col-lg-12">
-				<h3>Upload Video</h3>
-			</div>
-		</div>
 		<hr>
-		<form action="" method="POST" enctype="multipart/form-data">
-			<span class="fileUpload btn btn-default">
-				<span class="glyphicon glyphicon-upload"></span> Upload file
-				<input type="file" id="uploadFile" />
-			</span>
-		</form>
-		<p id="fileUploadError" class="text-danger hide"></p>
-		<div class="list-group" id="files"></div>
-		<script id="fileUploadProgressTemplate" type="text/x-jquery-tmpl">
-		<div class="list-group-item">
-			<div class="progress progress-striped active">
-				<div class="progress-bar progress-bar-info" style="width: 0%;"></div>
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3">
+				<form class="form-horizontal text-center" action="" method="POST" enctype="multipart/form-data">
+					<div class="form-group">
+						<input type="file" name="uploadFile" id="uploadFile" class="form-control">
+					</div>
+					<div class="form-group">
+						<button type="submit" class="btn btn-lg btn-primary">
+						<i class="glyphicon glyphicon-upload"></i> Dectect
+						</button>
+					</div>
+				</form>
 			</div>
+			<!-- <p id="fileUploadError" class="text-danger hide"></p>
+			<div class="list-group" id="files"></div>
+			<script id="fileUploadProgressTemplate" type="text/x-jquery-tmpl">
+			<div class="list-group-item">
+													<div class="progress progress-striped active">
+																							<div class="progress-bar progress-bar-info" style="width: 0%;"></div>
+													</div>
+			</div>
+			</script>
+			<script id="fileUploadItemTemplate" type="text/x-jquery-tmpl">
+			<div class="list-group-item">
+													<button type="button" class="close">&times;</button>
+													<span class="glyphicon glyphicon-file"></span> File name (type, date, etc)
+			</div>
+			</script> -->
 		</div>
-		</script>
-		<script id="fileUploadItemTemplate" type="text/x-jquery-tmpl">
-		<div class="list-group-item">
-			<button type="button" class="close">&times;</button>
-			<span class="glyphicon glyphicon-file"></span> File name (type, date, etc)
-		</div>
-		</script>
 	</div>
 {% endblock %}
