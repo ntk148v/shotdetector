@@ -1,0 +1,4 @@
+opencv
+Flask
+werkzeug
+numpy
