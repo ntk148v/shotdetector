@@ -209,6 +209,52 @@ class ShotBoundaryDetector(object):
         cap.release()
         cv2.destroyAllWindows()
 
+    def save_shots(self, boundary_queue):
+        """
+        save shots of video, shot like a scence in video
+        """
+        if not (os.path.exists(constants.SHOTS_DIR) or
+                os.path.isdir(constants.SHOTS_DIR)):
+            os.makedirs(constants.SHOTS_DIR)
+
+        cap = self.capture_video()
+        if not cap.isOpened():
+            raise IOError(" Something went wrong! Please check \
+                           your video path again!")
+        else:
+            print("Everything is fine")
+
+        self.shot_info(cap)
+
+        i = 0
+
+        path = constants.SHOTS_DIR + \
+            "/shot_{}.avi" . format(i)
+
+        out = cv2.VideoWriter(path, fourcc, fps, framesize)
+
+        boundary = boundary_queue.dequeue()
+        sframe_id = int(boundary['next_frame'])
+
+        while(cap.isOpened()):
+            ret, frame = cap.read()
+
+            if not ret:
+                print("No more frame")
+                break
+            i = i + 1
+            if i >= sframe_id and boundary_queue.size() != 0:
+                out.release()
+                boundary = boundary_queue.dequeue()
+                sframe_id = int(boundary['next_frame'])
+                path = constants.SHOTS_DIR + "/shot_{}.avi" . format(i)
+                out = cv2.VideoWriter(path, fourcc, fps, framesize)
+            out.write(frame)
+
+        out.release()
+        cap.release()
+        cv2.destroyAllWindows()
+
     def detect(self):
         """Detect Boundary
         """
@@ -225,8 +271,10 @@ class ShotBoundaryDetector(object):
 
         list_index = self.get_list_keyframes_index(boundary_queue)
         self.save_keyframes(list_index)
+        self.save_shots(boundary_queue)
         return list_index
 
 if __name__ == '__main__':
-    detector = ShotBoundaryDetector('/home/daidv/GITHUB/shotdetector/test_video/james.mp4')
+    detector = ShotBoundaryDetector(
+        '/home/daidv/GITHUB/shotdetector/test_video/james.mp4')
     detector.detect()
