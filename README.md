@@ -1,0 +1,5 @@
+# shotdetector
+
+- OpenCV 
+- ShotDetector 
+- MMDB
