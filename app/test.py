@@ -225,8 +225,7 @@ class ShotBoundaryDetector(object):
 
         list_index = self.get_list_keyframes_index(boundary_queue)
         self.save_keyframes(list_index)
-
-        # self.save(boundary_queue)
+        return list_index
 
 if __name__ == '__main__':
     detector = ShotBoundaryDetector('/home/daidv/GITHUB/shotdetector/test_video/james.mp4')

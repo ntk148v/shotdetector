@@ -1,8 +1,8 @@
-import os 
+import os
 
 DIRNAME = os.path.dirname(os.path.abspath(__file__))
-IMAGES_DIR = os.path.join(DIRNAME, 'images')
-SHOTS_DIR = os.path.join(DIRNAME, 'shots')
+IMAGES_DIR = os.path.join(DIRNAME, '../static/images')
+SHOTS_DIR = os.path.join(DIRNAME, '../static/shots')
 
 OPENCV_METHODS = {
     'CV_COMP_CORREL': 1,
@@ -11,4 +11,4 @@ OPENCV_METHODS = {
     'CV_COMP_BHATTACHARYYA': 4,
 }
 
-THRESHOLD_CONST = 7
+THRESHOLD_CONST = 10

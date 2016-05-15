@@ -1,4 +1,4 @@
-from app.shot_detector import ShotBoundaryDetector
+from app.test import ShotBoundaryDetector
 import config
 import logging
 
@@ -21,8 +21,11 @@ def allowed_file(filename):
 @app.route("/detect/<filename>")
 def detect(filename):
     detector = ShotBoundaryDetector(config.UPLOAD_DIR + filename)
-    detector.detect()
-    return render_template('detect.html')
+    list_index = detector.detect()
+    list_images = []
+    for index in list_index:
+        list_images.append(url_for('static', filename='images/keyframe_{}.jpg'. format(index)))
+    return render_template('detect.html', list_images=list_images)
 
 
 @app.route("/", methods=['GET', 'POST'])
