@@ -1,4 +1,4 @@
-from app.shot_detector import ShotBoundaryDetector
+from app2.shot_detector import ShotBoundaryDetector
 import config
 
 import os
@@ -22,7 +22,7 @@ def detect():
     return "Done!!"
 
 
-@app.route("/upload", method=['GET', 'POST'])
+@app.route("/upload", methods=['GET', 'POST'])
 def upload():
     if(request.method == "POST"):
         file = request.files['file']
@@ -31,12 +31,12 @@ def upload():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('uploaded_file',
                                     filename=filename))
-    return render_template(config.TEMPLATE_DIR + "/predetect.html")
+    return render_template(config.TEMPLATE_DIR + "predetect.html")
 
 
 @app.route("/")
 def home():
-    return render_template(config.TEMPLATE_DIR + '/upload.html')
+    return render_template('upload.html')
 
 if __name__ == '__main__':
     app.debug = True
