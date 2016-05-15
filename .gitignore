@@ -1,4 +1,5 @@
-*.pyc
 __pycache__/
-images/
-shots/
+uploads/
+static/images/
+static/shots/
+*.pyc
