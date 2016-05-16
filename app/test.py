@@ -88,8 +88,8 @@ class ShotBoundaryDetector(object):
         """
         cap = self.capture_video()
         if not cap.isOpened():
-            raise IOError(" Something went wrong! Please check \
-                           your video path again!")
+            raise IOError(
+                " Something went wrong! Please check your video path again!")
         else:
             print("Everything is fine")
 
@@ -186,8 +186,8 @@ class ShotBoundaryDetector(object):
         #### new code ###
         cap = self.capture_video()
         if not cap.isOpened():
-            raise IOError(" Something went wrong! Please check \
-                           your video path again!")
+            raise IOError(
+                "Something went wrong! Please check your video path again!")
         else:
             print("Everything is fine to save keyframes")
 
@@ -219,8 +219,8 @@ class ShotBoundaryDetector(object):
 
         cap = self.capture_video()
         if not cap.isOpened():
-            raise IOError(" Something went wrong! Please check \
-                           your video path again!")
+            raise IOError(
+                " Something went wrong! Please check your video path again!")
         else:
             print("Everything is fine")
 
