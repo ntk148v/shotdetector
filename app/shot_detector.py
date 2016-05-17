@@ -98,7 +98,8 @@ class ShotBoundaryDetector(object):
         """
         cap = self.capture_video()
         if not cap.isOpened():
-            raise IOError(" Something went wrong! Please check your video path again!")
+            raise IOError(
+                " Something went wrong! Please check your video path again!")
         else:
             print("Everything is fine")
 
@@ -139,14 +140,16 @@ class ShotBoundaryDetector(object):
                 queue[0]['histogram'],
                 queue[1]['histogram'],
                 constants.OPENCV_METHODS['CV_COMP_CORREL'])
-                #constants.OPENCV_METHODS['CV_COMP_CORREL', CV_COMP_CHISQR , CV_COMP_INTERSECT , CV_COMP_BHATTACHARYYA ])
+            # constants.OPENCV_METHODS['CV_COMP_CORREL', CV_COMP_CHISQR ,
+            # CV_COMP_INTERSECT , CV_COMP_BHATTACHARYYA ])
 
             diff = {
                 'prev_frame': queue[1]['id'],
                 'next_frame': queue[0]['id'],
                 'value': diff_value
             }
-            print("value = {} prev_frame = {} next_frame={}".format(diff['value'], diff['prev_frame'], diff['next_frame']))
+            print("value = {} prev_frame = {} next_frame={}".format(
+                diff['value'], diff['prev_frame'], diff['next_frame']))
             self.diff_queue.enqueue(diff)
             self.frame_queue.dequeue()
             del queue[:]
@@ -177,37 +180,39 @@ class ShotBoundaryDetector(object):
         arr.reverse()
         min_diff = arr[int(sframe_id)]['value']
 
-        print("-------------------------begin = {} end = {} -------------------------".format(sframe_id, eframe_id))
+        print(
+            "-------------------------begin = {} end = {} -------------------------".format(sframe_id, eframe_id))
 
-        for num in range(int(sframe_id),int(eframe_id+1)):
-            if arr[num]['value']<min_diff:
+        for num in range(int(sframe_id), int(eframe_id+1)):
+            if arr[num]['value'] < min_diff:
                 min_diff = arr[num]['value']
         print("min_diff = {}".format(min_diff))
         length_list = 0
         index_min = sframe_id
         number_min = 0
 
-        for num in range(int(sframe_id),int(eframe_id+1)):
-            if arr[num]['value']==min_diff:
+        for num in range(int(sframe_id), int(eframe_id+1)):
+            if arr[num]['value'] == min_diff:
                 index_min = num
-                number_min+=1
+                number_min += 1
             else:
-                if number_min>0:
+                if number_min > 0:
                     list_num_min.append(number_min)
                     list_index_min.append(index_min)
                     length_list += 1
-                    number_min=0
+                    number_min = 0
 
-        if(arr[int(eframe_id)]['value']==min_diff):
+        if(arr[int(eframe_id)]['value'] == min_diff):
             list_num_min.append(number_min)
             list_index_min.append(index_min)
             length_list += 1
 
         max = list_num_min[0]
         index_min = list_index_min[0]
-        for i in range(int(0),int(length_list)):
-            print("index = {} number = {}".format(list_index_min[i], list_num_min[i]))
-            if list_num_min[i]>max:
+        for i in range(int(0), int(length_list)):
+            print("index = {} number = {}".format(
+                list_index_min[i], list_num_min[i]))
+            if list_num_min[i] > max:
                 max = list_num_min[i]
                 index_min = list_index_min[i]
         print("max = {} index_min = {}".format(max, index_min))
@@ -215,30 +220,30 @@ class ShotBoundaryDetector(object):
 
     #-------------------------------------------------------------------------------------------------#
 
-    def calc_keyframe_diff_min_mark(self, sframe_id, eframe_id): 
-        length_mark = int(math.sqrt(eframe_id-sframe_id))  
-        if(length_mark>=(eframe_id-sframe_id+1)):
+    def calc_keyframe_diff_min_mark(self, sframe_id, eframe_id):
+        length_mark = int(math.sqrt(eframe_id-sframe_id))
+        if(length_mark >= (eframe_id-sframe_id+1)):
             return int((sframe_id+eframe_id)/2)
         else:
             min_mark = 0
             index_mark = sframe_id
             arr = self.diff_queue.get()
             arr.reverse()
-            for i in range(int(sframe_id),int(sframe_id+length_mark)):
-                min_mark+=arr[i]['value']
+            for i in range(int(sframe_id), int(sframe_id+length_mark)):
+                min_mark += arr[i]['value']
 
             #print("min_mark = {}".format(min_mark))
 
             for i in range(int(sframe_id+1), int(eframe_id-length_mark+1)):
                 sum_mark = 0
                 for j in range(int(i), int(i+length_mark)):
-                    sum_mark+=arr[j]['value']
+                    sum_mark += arr[j]['value']
                     #print("j = {} sum = {}".format(j, sum_mark))
                 #print("-------------------------- i = {} sum = {} -------------------------".format(i, sum_mark))
-                if sum_mark<min_mark:
+                if sum_mark < min_mark:
                     index_mark = i
 
-        return  int(index_mark+length_mark/2)
+        return int(index_mark+length_mark/2)
 
     #-------------------------------------------------------------------------------------------------#
 
@@ -249,20 +254,20 @@ class ShotBoundaryDetector(object):
         temp = 0
         index_diff = sframe_id
         print("start = {} end = {}".format(sframe_id, eframe_id))
-        for num in range(int(sframe_id),int(eframe_id+1)):
-            total+=arr[num]['value']
-        
+        for num in range(int(sframe_id), int(eframe_id+1)):
+            total += arr[num]['value']
+
         avg = total/(eframe_id-sframe_id+1)
         print("total = {} avg = {}".format(total, avg))
 
         list_diff_avg = []
 
-        for i in range(int(sframe_id),int(eframe_id+1)):
+        for i in range(int(sframe_id), int(eframe_id+1)):
             list_diff_avg.append(abs(avg-arr[i]['value']))
 
         min_diff_avg = list_diff_avg[0]
-        for i in range(int(0),int(eframe_id-sframe_id)):
-            if list_diff_avg[i]<min_diff_avg:
+        for i in range(int(0), int(eframe_id-sframe_id)):
+            if list_diff_avg[i] < min_diff_avg:
                 min_diff_avg = list_diff_avg[i]
                 index_diff = i
 
@@ -271,15 +276,14 @@ class ShotBoundaryDetector(object):
         list_index_min_diff_avg = []
         length_list_index_min_diff_avg = 0
 
-        for i in range(int(0),int(eframe_id-sframe_id)):
-            if list_diff_avg[i]==min_diff_avg:
+        for i in range(int(0), int(eframe_id-sframe_id)):
+            if list_diff_avg[i] == min_diff_avg:
                 list_index_min_diff_avg.append(i)
-                length_list_index_min_diff_avg+=1
+                length_list_index_min_diff_avg += 1
 
         return int(list_index_min_diff_avg[int(length_list_index_min_diff_avg/2)]+sframe_id)
 
-
-    #-------------------------------------------------------------------------------------------------#
+#-------------------------------------------------------------------------------------------------#
 
     def get_list_keyframes_index(self, boundary_queue):
         """
@@ -303,17 +307,20 @@ class ShotBoundaryDetector(object):
 
     #-------------------------------------------------------------------------------------------------#
 
-    def delete_content_folder(self, path_folder):
-        for the_file in os.listdir(path_folder):
-            file_path = os.path.join(path_folder, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-                #elif os.path.isdir(file_path): shutil.rmtree(file_path)
-            except Exception as e:
-                print(e)
+    def delete_dir_content(self, path):
+        if not (os.path.exists(path) or os.path.isdir(path)):
+            pass
+        else:
+            for the_file in os.listdir(path):
+                file_path = os.path.join(path, the_file)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                    # elif os.path.isdir(file_path): shutil.rmtree(file_path)
+                except Exception as e:
+                    logger.error(e)
 
-    #-------------------------------------------------------------------------------------------------#    
+    #-------------------------------------------------------------------------------------------------#
 
     def save_keyframes(self, list_index):
         """Summary
@@ -328,7 +335,8 @@ class ShotBoundaryDetector(object):
         #### new code ###
         cap = self.capture_video()
         if not cap.isOpened():
-            raise IOError(" Something went wrong! Please check your video path again!")
+            raise IOError(
+                " Something went wrong! Please check your video path again!")
         else:
             print("Everything is fine to save keyframes")
 
@@ -351,70 +359,66 @@ class ShotBoundaryDetector(object):
         cv2.destroyAllWindows()
 
     #-------------------------------------------------------------------------------------------------#
-    def save_shots(self, boundary_queue):
-        """Summary
-
-        Args:
-            sframe_id (TYPE): Description
-            eframe_id (TYPE): Description
-
-        Returns:
-            TYPE: Description
+    def get_list_shots(self, boundary_queue):
+        """ get dict (start, end) index keyframes of shots
         """
-        #boundary_dict = boundary_queue.get().reverse()
+        list_shots = []
         i = 0
         while(True):
             if(i >= (boundary_queue.size() - 1)):
                 break
 
-            sframe_id = boundary_queue.get()[i]['next_frame']
-            eframe_id = boundary_queue.get()[i + 1]['prev_frame']
+            sframe_id = int(boundary_queue.get()[i]['next_frame'])
+            eframe_id = int(boundary_queue.get()[i + 1]['prev_frame'])
 
-            print("{} - {}". format(sframe_id, eframe_id))
+            # save video here
+            list_shots.append([sframe_id, eframe_id])
             i += 1
 
-        return
+        return list_shots
 
-        if not (os.path.exists(constants.IMAGES_DIR) or
-                os.path.isdir(constants.IMAGES_DIR)):
-            os.makedirs(constants.IMAGES_DIR)
+    def save_shots(self, list_shots):
+
+        if not (os.path.exists(constants.SHOTS_DIR) or
+                os.path.isdir(constants.SHOTS_DIR)):
+            os.makedirs(constants.SHOTS_DIR)
 
         #### new code ###
         cap = self.capture_video()
         if not cap.isOpened():
-            raise IOError(" Something went wrong! Please check your video path again!")
+            raise IOError(
+                " Something went wrong! Please check your video path again!")
         else:
             print("Everything is fine to save keyframes")
 
         self.shot_info(cap)
-        i = 1
+        i = 1  # index frame
+        j = 0  # index shots
+        number_shots = len(list_shots) - 1
+        path = constants.SHOTS_DIR + \
+            "/{}_{}.avi" . format(list_shots[j][0], list_shots[j][1])
+        out = cv2.VideoWriter(path, fourcc, fps, framesize)
+
         while(cap.isOpened()):
             ret, frame = cap.read()
 
             if not ret:
                 break
 
-            if i in list_index:
-                im = Image.fromarray(frame)
-                im.save(
-                    constants.IMAGES_DIR + "/keyframe_{}.jpg". format(i))
+            if (i >= list_shots[j][0] and i <= list_shots[j][1]) or j == number_shots:
+                out.write(frame)
+            else:
+                out.release()
+                j = j + 1
+                path = constants.SHOTS_DIR + \
+                    "/{}_{}.avi" . format(list_shots[j][0], list_shots[j][1])
+                out = cv2.VideoWriter(path, fourcc, fps, framesize)
 
             i = i + 1
 
+        out.release()
         cap.release()
         cv2.destroyAllWindows()
-
-        if not (os.path.exists(constants.SHOTS_DIR) or
-                os.path.isdir(constants.SHOTS_DIR)):
-            os.makedirs(constants.SHOTS_DIR)
-        path = constants.SHOTS_DIR + \
-            "/{}_{}.avi" . format(int(sframe_id), int(eframe_id))
-
-        out = cv2.VideoWriter(path, fourcc, fps, framesize)
-
-        for frame in self.frames[int(sframe_id):int(eframe_id)]:
-            out.write(frame)
-        out.release()
 
     #-------------------------------------------------------------------------------------------------#
     def detect(self):
@@ -426,37 +430,39 @@ class ShotBoundaryDetector(object):
         boundary_queue = Queue()
 
         end = {
-                'prev_frame': self.diff_queue.size()-1,
-                'next_frame': self.diff_queue.size()-1,
-                'value': 0
-            }
+            'prev_frame': self.diff_queue.size()-1,
+            'next_frame': self.diff_queue.size()-1,
+            'value': 0
+        }
         boundary_queue.enqueue(end)
 
         for diff in self.diff_queue.get():
-            #print("{}".format(diff['value']))
+            # print("{}".format(diff['value']))
             if(diff['value'] >= self.threshold):
                 print("Shot Boundary Detected : {} - {}"
                       . format(diff['prev_frame'], diff['next_frame']))
                 boundary_queue.enqueue(diff)
 
         start = {
-                'prev_frame': 0,
-                'next_frame': 0,
-                'value': 0
-            }
+            'prev_frame': 0,
+            'next_frame': 0,
+            'value': 0
+        }
         boundary_queue.enqueue(start)
 
         list_index = self.get_list_keyframes_index(boundary_queue)
-        print(list_index)
+        list_shots = self.get_list_shots(boundary_queue)
 
-        self.delete_content_folder(constants.IMAGES_DIR)
-        self.delete_content_folder(constants.SHOTS_DIR)
+        self.delete_dir_content(constants.IMAGES_DIR)
+        self.delete_dir_content(constants.SHOTS_DIR)
+
         self.save_keyframes(list_index)
+        self.save_shots(list_shots)
         return list_index
-        # self.save(boundary_queue)
 
     #-------------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    detector = ShotBoundaryDetector('C:\\Users\\tuanl\\OneDrive\\python\\shotdetector-gui\\test_video\\keyframe.avi')
+    detector = ShotBoundaryDetector(
+        'C:\\Users\\tuanl\\OneDrive\\python\\shotdetector-gui\\test_video\\keyframe.avi')
     detector.detect()

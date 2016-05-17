@@ -35,6 +35,9 @@ def home():
         if file and allowed_file(file.filename):
             logger.info("{}" . format(file.filename))
             filename = secure_filename(file.filename)
+            if not (os.path.exists(app.config['UPLOAD_DIR']) or
+                    os.path.isdir(app.config['UPLOAD_DIR'])):
+                os.makedirs(app.config['UPLOAD_DIR'])
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return redirect(url_for('detect',
                                     filename=filename))
