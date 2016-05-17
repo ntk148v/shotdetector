@@ -1,4 +1,4 @@
-from app.test import ShotBoundaryDetector
+from app.test2 import ShotBoundaryDetector
 import config
 import logging
 
