@@ -24,7 +24,9 @@ def detect(filename, algorithm, threshold):
     list_index = detector.detect(algorithm, threshold)
     list_images = []
     for index in list_index:
-        list_images.append(url_for('static', filename='images/keyframe_{}.jpg'. format(index)))
+        list_images.append(
+            url_for('static', filename='images/keyframe_{}.jpg'. format(index)))
+        
     return render_template('detect.html', list_images=list_images)
 
 
