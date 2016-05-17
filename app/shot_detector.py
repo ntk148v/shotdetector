@@ -351,7 +351,72 @@ class ShotBoundaryDetector(object):
         cv2.destroyAllWindows()
 
     #-------------------------------------------------------------------------------------------------#
+    def save_shots(self, boundary_queue):
+        """Summary
 
+        Args:
+            sframe_id (TYPE): Description
+            eframe_id (TYPE): Description
+
+        Returns:
+            TYPE: Description
+        """
+        #boundary_dict = boundary_queue.get().reverse()
+        i = 0
+        while(True):
+            if(i >= (boundary_queue.size() - 1)):
+                break
+
+            sframe_id = boundary_queue.get()[i]['next_frame']
+            eframe_id = boundary_queue.get()[i + 1]['prev_frame']
+
+            print("{} - {}". format(sframe_id, eframe_id))
+            i += 1
+
+        return
+
+        if not (os.path.exists(constants.IMAGES_DIR) or
+                os.path.isdir(constants.IMAGES_DIR)):
+            os.makedirs(constants.IMAGES_DIR)
+
+        #### new code ###
+        cap = self.capture_video()
+        if not cap.isOpened():
+            raise IOError(" Something went wrong! Please check your video path again!")
+        else:
+            print("Everything is fine to save keyframes")
+
+        self.shot_info(cap)
+        i = 1
+        while(cap.isOpened()):
+            ret, frame = cap.read()
+
+            if not ret:
+                break
+
+            if i in list_index:
+                im = Image.fromarray(frame)
+                im.save(
+                    constants.IMAGES_DIR + "/keyframe_{}.jpg". format(i))
+
+            i = i + 1
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+        if not (os.path.exists(constants.SHOTS_DIR) or
+                os.path.isdir(constants.SHOTS_DIR)):
+            os.makedirs(constants.SHOTS_DIR)
+        path = constants.SHOTS_DIR + \
+            "/{}_{}.avi" . format(int(sframe_id), int(eframe_id))
+
+        out = cv2.VideoWriter(path, fourcc, fps, framesize)
+
+        for frame in self.frames[int(sframe_id):int(eframe_id)]:
+            out.write(frame)
+        out.release()
+
+    #-------------------------------------------------------------------------------------------------#
     def detect(self):
         """Detect Boundary
         """
