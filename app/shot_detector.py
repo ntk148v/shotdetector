@@ -285,7 +285,7 @@ class ShotBoundaryDetector(object):
 
 #-------------------------------------------------------------------------------------------------#
 
-    def get_list_keyframes_index(self, boundary_queue):
+    def get_list_keyframes_index(self, boundary_queue, algorithm=2):
         """
         get list index: all of keyframes
         """
@@ -298,7 +298,14 @@ class ShotBoundaryDetector(object):
             sframe_id = boundary_queue.get()[i]['next_frame']
             eframe_id = boundary_queue.get()[i + 1]['prev_frame']
 
-            index = int(self.calc_keyframe_diff_min(sframe_id, eframe_id))
+            if algorithm == 1:
+                index = int(self.calc_keyframe_avg(sframe_id, eframe_id))
+            elif algorithm == 2:
+                index = int(self.calc_keyframe_diff_min(sframe_id, eframe_id))
+            elif algorithm == 3:
+                index = int(self.calc_keyframe_diff_min_mark(sframe_id, eframe_id))
+            else:
+                index = int(self.calc_keyframe_diff_med(sframe_id, eframe_id))
             list_index.append(index)
             i += 1
             print("Key Frame : {}" . format(index))
@@ -421,12 +428,12 @@ class ShotBoundaryDetector(object):
         cv2.destroyAllWindows()
 
     #-------------------------------------------------------------------------------------------------#
-    def detect(self):
+    def detect(self, algorithm=2, threshold=1):
         """Detect Boundary
         """
         self.get_diff_queue()
         self.threshold = adaptive_threshold.calc_threshold(
-            self.diff_queue, constants.THRESHOLD_CONST)
+            self.diff_queue, threshold)
         boundary_queue = Queue()
 
         end = {
@@ -450,7 +457,7 @@ class ShotBoundaryDetector(object):
         }
         boundary_queue.enqueue(start)
 
-        list_index = self.get_list_keyframes_index(boundary_queue)
+        list_index = self.get_list_keyframes_index(boundary_queue, algorithm)
         list_shots = self.get_list_shots(boundary_queue)
 
         self.delete_dir_content(constants.IMAGES_DIR)

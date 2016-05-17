@@ -9,6 +9,30 @@
 						<input type="file" name="uploadFile" id="uploadFile" class="form-control">
 					</div>
 					<div class="form-group">
+						<p>Select algorithm for keyframes detection</p>
+						<select name="algorithm" class="form-control">
+							<option value="1">calc_keyframe_avg</option>
+							<option value="2">calc_keyframe_diff_min</option>
+							<option value="3">calc_keyframe_diff_min_mark</option>
+							<option value="4">calc_keyframe_diff_med</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<p>Select THRESHOLD_CONSTANT opencv</p>
+						<select name="threshold" class="form-control">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+							<option value="9">9</option>
+							<option value="10">10</option>
+						</select>
+					</div>
+					<div class="form-group">
 						<button type="submit" class="btn btn-lg btn-primary">
 						<i class="glyphicon glyphicon-upload"></i> Dectect
 						</button>

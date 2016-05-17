@@ -18,10 +18,10 @@ def allowed_file(filename):
         filename.rsplit('.', 1)[1] in config.ALLOWED_EXTENSIONS
 
 
-@app.route("/detect/<filename>")
-def detect(filename):
+@app.route("/detect/<filename>/<int:algorithm>/<int:threshold>")
+def detect(filename, algorithm, threshold):
     detector = ShotBoundaryDetector(config.UPLOAD_DIR + filename)
-    list_index = detector.detect()
+    list_index = detector.detect(algorithm, threshold)
     list_images = []
     for index in list_index:
         list_images.append(url_for('static', filename='images/keyframe_{}.jpg'. format(index)))
@@ -40,7 +40,7 @@ def home():
                 os.makedirs(app.config['UPLOAD_DIR'])
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return redirect(url_for('detect',
-                                    filename=filename))
+                                    filename=filename, algorithm=request.form['algorithm'], threshold=request.form['threshold']))
     return render_template('upload.html')
 
 if __name__ == '__main__':
