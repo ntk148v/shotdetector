@@ -25,7 +25,8 @@ def detect(filename, algorithm, threshold, method):
     list_images = []
     for index in list_index:
         list_images.append(
-            url_for('static', filename='images/keyframe_{}.jpg'. format(index)))
+            url_for('static', filename='images/keyframe_{}.jpg'
+                    . format(index)))
 
     return render_template('detect.html', list_images=list_images)
 
@@ -42,9 +43,12 @@ def home():
                 os.makedirs(app.config['UPLOAD_DIR'])
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return redirect(url_for('detect',
-                                    filename=filename, algorithm=request.form['algorithm'], threshold=request.form['threshold'], method=request.form['method']))
+                                    filename=filename,
+                                    algorithm=request.form['algorithm'],
+                                    threshold=request.form['threshold'],
+                                    method=request.form['method']))
     return render_template('upload.html')
 
 if __name__ == '__main__':
-    app.debug=True
-    app.run(debug = True)
+    app.debug = True
+    app.run(debug=True)

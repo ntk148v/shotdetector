@@ -1,5 +1,5 @@
 import cv2
-import copy
+import logging
 import math
 import os
 
@@ -15,6 +15,8 @@ fps = None
 fourcc = None
 framesize = None
 
+logger = logging.getLogger(__name__)
+
 
 class ShotBoundaryDetector(object):
 
@@ -29,8 +31,6 @@ class ShotBoundaryDetector(object):
         video_path (string): path of source video
     """
 
-    #-------------------------------------------------------------------------------------------------#
-
     def __init__(self, video_path):
         """Initalize
 
@@ -41,8 +41,6 @@ class ShotBoundaryDetector(object):
         self.frame_queue = FrameQueue()
         self.diff_queue = DiffQueue()
 
-    #-------------------------------------------------------------------------------------------------#
-
     def capture_video(self):
         """Capture source video
 
@@ -50,8 +48,6 @@ class ShotBoundaryDetector(object):
             VideoCapture: capture
         """
         return cv2.VideoCapture(self.video_path)
-
-    #-------------------------------------------------------------------------------------------------#
 
     def shot_info(self, cap):
         """Summary
@@ -68,8 +64,6 @@ class ShotBoundaryDetector(object):
         # fourcc = int(cv2.VideoWriter_fourcc(*'XVID'))
         framesize = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
                      int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-
-    #-------------------------------------------------------------------------------------------------#
 
     def get_frame_info(self, _id, _pos, _hist):
         """Get information of frame
@@ -89,8 +83,6 @@ class ShotBoundaryDetector(object):
         }
 
         return frame_info
-
-    #-------------------------------------------------------------------------------------------------#
 
     def get_diff_queue(self, method=1):
         """
@@ -119,14 +111,11 @@ class ShotBoundaryDetector(object):
                 cap.get(cv2.CAP_PROP_POS_MSEC),
                 hist_handler.calc_hist([gray], [0], None, [256], [0, 256])
             )
-            #print("Read frame from video...id = {}idtogram = {}".format(frame_info['id'], frame_info['histogram']))
             self.frame_queue.enqueue(frame_info)
             self.put_diff_queue(method)
 
         cap.release()
         cv2.destroyAllWindows()
-
-    #-------------------------------------------------------------------------------------------------#
 
     def put_diff_queue(self, method):
         """
@@ -140,8 +129,8 @@ class ShotBoundaryDetector(object):
                 queue[0]['histogram'],
                 queue[1]['histogram'],
                 method
-                )
-            #constants.OPENCV_METHODS['CV_COMP_CORREL'])
+            )
+            # constants.OPENCV_METHODS['CV_COMP_CORREL'])
             # constants.OPENCV_METHODS['CV_COMP_CORREL', CV_COMP_CHISQR ,
             # CV_COMP_INTERSECT , CV_COMP_BHATTACHARYYA ])
 
@@ -157,8 +146,6 @@ class ShotBoundaryDetector(object):
             del queue[:]
             return True
 
-    #-------------------------------------------------------------------------------------------------#
-
     def calc_keyframe_avg(self, sframe_id, eframe_id):
         """Summary
 
@@ -173,8 +160,6 @@ class ShotBoundaryDetector(object):
             math.floor(abs(eframe_id - sframe_id) / 2)
         return mframe_id
 
-    #-------------------------------------------------------------------------------------------------#
-
     def calc_keyframe_diff_min(self, sframe_id, eframe_id):
         list_num_min = []
         list_index_min = []
@@ -183,7 +168,8 @@ class ShotBoundaryDetector(object):
         min_diff = arr[int(sframe_id)]['value']
 
         print(
-            "-------------------------begin = {} end = {} -------------------------".format(sframe_id, eframe_id))
+            "---------------- begin = {} end = {} -------------------"
+            . format(sframe_id, eframe_id))
 
         for num in range(int(sframe_id), int(eframe_id+1)):
             if arr[num]['value'] < min_diff:
@@ -220,8 +206,6 @@ class ShotBoundaryDetector(object):
         print("max = {} index_min = {}".format(max, index_min))
         return int(index_min - max/2)
 
-    #-------------------------------------------------------------------------------------------------#
-
     def calc_keyframe_diff_min_mark(self, sframe_id, eframe_id):
         length_mark = int(math.sqrt(eframe_id-sframe_id))
         if(length_mark >= (eframe_id-sframe_id+1)):
@@ -234,20 +218,14 @@ class ShotBoundaryDetector(object):
             for i in range(int(sframe_id), int(sframe_id+length_mark)):
                 min_mark += arr[i]['value']
 
-            #print("min_mark = {}".format(min_mark))
-
             for i in range(int(sframe_id+1), int(eframe_id-length_mark+1)):
                 sum_mark = 0
                 for j in range(int(i), int(i+length_mark)):
                     sum_mark += arr[j]['value']
-                    #print("j = {} sum = {}".format(j, sum_mark))
-                #print("-------------------------- i = {} sum = {} -------------------------".format(i, sum_mark))
                 if sum_mark < min_mark:
                     index_mark = i
 
         return int(index_mark+length_mark/2)
-
-    #-------------------------------------------------------------------------------------------------#
 
     def calc_keyframe_diff_med(self, sframe_id, eframe_id):
         arr = self.diff_queue.get()
@@ -285,8 +263,6 @@ class ShotBoundaryDetector(object):
 
         return int(list_index_min_diff_avg[int(length_list_index_min_diff_avg/2)]+sframe_id)
 
-#-------------------------------------------------------------------------------------------------#
-
     def get_list_keyframes_index(self, boundary_queue, algorithm=2):
         """
         get list index: all of keyframes
@@ -305,7 +281,8 @@ class ShotBoundaryDetector(object):
             elif algorithm == 2:
                 index = int(self.calc_keyframe_diff_min(sframe_id, eframe_id))
             elif algorithm == 3:
-                index = int(self.calc_keyframe_diff_min_mark(sframe_id, eframe_id))
+                index = int(
+                    self.calc_keyframe_diff_min_mark(sframe_id, eframe_id))
             else:
                 index = int(self.calc_keyframe_diff_med(sframe_id, eframe_id))
             list_index.append(index)
@@ -313,8 +290,6 @@ class ShotBoundaryDetector(object):
             print("Key Frame : {}" . format(index))
 
         return list_index
-
-    #-------------------------------------------------------------------------------------------------#
 
     def delete_dir_content(self, path):
         if not (os.path.exists(path) or os.path.isdir(path)):
@@ -325,11 +300,8 @@ class ShotBoundaryDetector(object):
                 try:
                     if os.path.isfile(file_path):
                         os.unlink(file_path)
-                    # elif os.path.isdir(file_path): shutil.rmtree(file_path)
                 except Exception as e:
                     logger.error(e)
-
-    #-------------------------------------------------------------------------------------------------#
 
     def save_keyframes(self, list_index):
         """Summary
@@ -367,7 +339,6 @@ class ShotBoundaryDetector(object):
         cap.release()
         cv2.destroyAllWindows()
 
-    #-------------------------------------------------------------------------------------------------#
     def get_list_shots(self, boundary_queue):
         """ get dict (start, end) index keyframes of shots
         """
@@ -429,8 +400,7 @@ class ShotBoundaryDetector(object):
         cap.release()
         cv2.destroyAllWindows()
 
-    #-------------------------------------------------------------------------------------------------#
-    def detect(self, algorithm=2, threshold=1, method = 1):
+    def detect(self, algorithm=2, threshold=1, method=1):
         """Detect Boundary
         """
         self.get_diff_queue(method)
@@ -468,10 +438,3 @@ class ShotBoundaryDetector(object):
         self.save_keyframes(list_index)
         self.save_shots(list_shots)
         return list_index
-
-    #-------------------------------------------------------------------------------------------------#
-
-if __name__ == '__main__':
-    detector = ShotBoundaryDetector(
-        'C:\\Users\\tuanl\\OneDrive\\python\\shotdetector-gui\\test_video\\keyframe.avi')
-    detector.detect()
