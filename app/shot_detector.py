@@ -92,7 +92,7 @@ class ShotBoundaryDetector(object):
 
     #-------------------------------------------------------------------------------------------------#
 
-    def get_diff_queue(self):
+    def get_diff_queue(self, method=1):
         """
         read video and get difference between any couple keyframes
         """
@@ -121,14 +121,14 @@ class ShotBoundaryDetector(object):
             )
             #print("Read frame from video...id = {}idtogram = {}".format(frame_info['id'], frame_info['histogram']))
             self.frame_queue.enqueue(frame_info)
-            self.put_diff_queue()
+            self.put_diff_queue(method)
 
         cap.release()
         cv2.destroyAllWindows()
 
     #-------------------------------------------------------------------------------------------------#
 
-    def put_diff_queue(self):
+    def put_diff_queue(self, method):
         """
         calc difference histogram and put to diff_queue
         """
@@ -139,7 +139,9 @@ class ShotBoundaryDetector(object):
             diff_value = hist_handler.comp_hist(
                 queue[0]['histogram'],
                 queue[1]['histogram'],
-                constants.OPENCV_METHODS['CV_COMP_CORREL'])
+                method
+                )
+            #constants.OPENCV_METHODS['CV_COMP_CORREL'])
             # constants.OPENCV_METHODS['CV_COMP_CORREL', CV_COMP_CHISQR ,
             # CV_COMP_INTERSECT , CV_COMP_BHATTACHARYYA ])
 
@@ -428,10 +430,10 @@ class ShotBoundaryDetector(object):
         cv2.destroyAllWindows()
 
     #-------------------------------------------------------------------------------------------------#
-    def detect(self, algorithm=2, threshold=1):
+    def detect(self, algorithm=2, threshold=1, method = 1):
         """Detect Boundary
         """
-        self.get_diff_queue()
+        self.get_diff_queue(method)
         self.threshold = adaptive_threshold.calc_threshold(
             self.diff_queue, threshold)
         boundary_queue = Queue()
