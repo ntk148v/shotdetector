@@ -1,9 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-	<div class="w3-content" style="max-width:800px;position:relative">
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<div class="col-lg-6 col-lg-offset-3">
+		<div id="chart_div"></div>
+	</div>
+	<div class="w3-content" style="max-width:800px;position:relative; border:10px solid yellowgreen;">
 	{% if list_images %}
 		{% for image in list_images %}
-		    <img class="mySlides" src="{{image}}" style="width:100%">
+		    <p class="mySlides">{{ image.split("/")[-1:][0]}}<img src="{{image}}" style="width:100%"></p>
 		{% endfor %}
 	{% else %}
 		<div class="container-fluid">
@@ -29,5 +33,30 @@
 	  }
 	  x[slideIndex-1].style.display = "block";  
 	}
+
+	// chart google
+	google.charts.load('current', {packages: ['corechart', 'line']});
+	google.charts.setOnLoadCallback(drawBackgroundColor);
+
+	function drawBackgroundColor() {
+	      var data = new google.visualization.DataTable();
+	      data.addColumn('number', 'X');
+	      data.addColumn('number', 'value_diff');
+
+	      data.addRows({{list_diff}});
+
+	      var options = {
+	        hAxis: {
+	          title: 'Frames'
+	        },
+	        vAxis: {
+	          title: 'Different Histogram '
+	        },
+	        backgroundColor: '#f1f8e9'
+	      };
+
+	      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+	      chart.draw(data, options);
+	    }
 	</script>
 {% endblock %}

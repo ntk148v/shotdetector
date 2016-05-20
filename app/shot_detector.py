@@ -10,7 +10,6 @@ import adaptive_threshold
 
 from PIL import Image
 
-
 fps = None
 fourcc = None
 framesize = None
@@ -105,7 +104,8 @@ class ShotBoundaryDetector(object):
                 print("No more frame")
                 break
 
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gray = frame
             frame_info = self.get_frame_info(
                 cap.get(cv2.CAP_PROP_POS_FRAMES),
                 cap.get(cv2.CAP_PROP_POS_MSEC),
@@ -330,9 +330,12 @@ class ShotBoundaryDetector(object):
                 break
 
             if i in list_index:
+
                 im = Image.fromarray(frame)
+                b, g, r = im.split()
+                im = Image.merge("RGB", (r, g, b))
                 im.save(
-                    constants.IMAGES_DIR + "/keyframe_{}.jpg". format(i))
+                    constants.IMAGES_DIR + "/keyframe_{}.jpg". format(i), 'JPEG')
 
             i = i + 1
 
@@ -414,7 +417,6 @@ class ShotBoundaryDetector(object):
             'value': 0
         }
         boundary_queue.enqueue(end)
-
         for diff in self.diff_queue.get():
             # print("{}".format(diff['value']))
             if(diff['value'] >= self.threshold):
@@ -431,10 +433,12 @@ class ShotBoundaryDetector(object):
 
         list_index = self.get_list_keyframes_index(boundary_queue, algorithm)
         list_shots = self.get_list_shots(boundary_queue)
+        diffs = self.diff_queue.get()
+        diffs.reverse()
 
         self.delete_dir_content(constants.IMAGES_DIR)
         self.delete_dir_content(constants.SHOTS_DIR)
 
         self.save_keyframes(list_index)
         self.save_shots(list_shots)
-        return list_index
+        return list_index, diffs
