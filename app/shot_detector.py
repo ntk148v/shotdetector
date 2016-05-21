@@ -104,8 +104,8 @@ class ShotBoundaryDetector(object):
                 print("No more frame")
                 break
 
-            #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            gray = frame
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            #gray = frame
             frame_info = self.get_frame_info(
                 cap.get(cv2.CAP_PROP_POS_FRAMES),
                 cap.get(cv2.CAP_PROP_POS_MSEC),
@@ -146,6 +146,8 @@ class ShotBoundaryDetector(object):
             del queue[:]
             return True
 
+    #--------------------------------------------------------------------------------------------#
+
     def calc_keyframe_avg(self, sframe_id, eframe_id):
         """Summary
 
@@ -156,98 +158,148 @@ class ShotBoundaryDetector(object):
         Returns:
             TYPE: Description
         """
+        if eframe_id<= sframe_id:
+            return int(sframe_id)
         mframe_id = sframe_id + \
             math.floor(abs(eframe_id - sframe_id) / 2)
-        return mframe_id
+        if mframe_id > 0:
+            return mframe_id
+        return 1
+
+    #--------------------------------------------------------------------------------------------#
 
     def calc_keyframe_diff_min(self, sframe_id, eframe_id):
+        if eframe_id<= sframe_id:
+            return int(sframe_id)
         list_num_min = []
         list_index_min = []
         arr = self.diff_queue.get()
         arr.reverse()
         min_diff = arr[int(sframe_id)]['value']
 
-        print(
-            "---------------- begin = {} end = {} -------------------"
-            . format(sframe_id, eframe_id))
+        print("-------------------------begin = {} end = {} -------------------------".format(sframe_id, eframe_id))
 
-        for num in range(int(sframe_id), int(eframe_id+1)):
-            if arr[num]['value'] < min_diff:
+        for num in range(int(sframe_id),int(eframe_id+1)):
+            print("{}".format(arr[num]['value']))
+            if arr[num]['value']<min_diff:
                 min_diff = arr[num]['value']
         print("min_diff = {}".format(min_diff))
         length_list = 0
         index_min = sframe_id
         number_min = 0
 
-        for num in range(int(sframe_id), int(eframe_id+1)):
-            if arr[num]['value'] == min_diff:
+        for num in range(int(sframe_id),int(eframe_id+1)):
+            if arr[num]['value']==min_diff:
                 index_min = num
-                number_min += 1
+                number_min+=1
             else:
-                if number_min > 0:
+                if number_min>0:
                     list_num_min.append(number_min)
                     list_index_min.append(index_min)
                     length_list += 1
-                    number_min = 0
+                    number_min=0
 
-        if(arr[int(eframe_id)]['value'] == min_diff):
+        if(arr[int(eframe_id)]['value']==min_diff):
             list_num_min.append(number_min)
             list_index_min.append(index_min)
             length_list += 1
 
         max = list_num_min[0]
         index_min = list_index_min[0]
-        for i in range(int(0), int(length_list)):
-            print("index = {} number = {}".format(
-                list_index_min[i], list_num_min[i]))
-            if list_num_min[i] > max:
+        for i in range(int(0),int(length_list)):
+            print("index = {} number = {}".format(list_index_min[i], list_num_min[i]))
+            if list_num_min[i]>max:
                 max = list_num_min[i]
                 index_min = list_index_min[i]
         print("max = {} index_min = {}".format(max, index_min))
-        return int(index_min - max/2)
 
-    def calc_keyframe_diff_min_mark(self, sframe_id, eframe_id):
-        length_mark = int(math.sqrt(eframe_id-sframe_id))
-        if(length_mark >= (eframe_id-sframe_id+1)):
-            return int((sframe_id+eframe_id)/2)
+        if int(index_min - max/2) > 0:
+            return int(index_min - max/2)
+        return 1
+
+    #--------------------------------------------------------------------------------------------#
+
+    def calc_keyframe_diff_min_mark(self, sframe_id, eframe_id): 
+        if eframe_id<= sframe_id:
+            return int(sframe_id)
+        length_mark = int(math.sqrt(eframe_id-sframe_id)) 
+        #length_mark = int((eframe_id-sframe_id+1)/2) 
+        if(length_mark>=(eframe_id-sframe_id+1)):
+            return int((sframe_id+eframe_id+1)/2)
         else:
             min_mark = 0
             index_mark = sframe_id
             arr = self.diff_queue.get()
             arr.reverse()
-            for i in range(int(sframe_id), int(sframe_id+length_mark)):
-                min_mark += arr[i]['value']
+
+            #print arr sframe eframe
+            #print("Arr begin= {} end = {}".format(sframe_id, eframe_id))
+            #for i in range(int(sframe_id), int(eframe_id+1)):
+            #    print(arr[i]['value'])
+
+            for i in range(int(sframe_id),int(sframe_id+length_mark)):
+                min_mark+=arr[i]['value']
+
+            #print("min_mark = {}".format(min_mark))
 
             for i in range(int(sframe_id+1), int(eframe_id-length_mark+1)):
                 sum_mark = 0
                 for j in range(int(i), int(i+length_mark)):
-                    sum_mark += arr[j]['value']
-                if sum_mark < min_mark:
+                    sum_mark+=arr[j]['value']
+                    #print("j = {} sum = {}".format(j, sum_mark))
+                #print("-------------------------- i = {} sum = {} -------------------------".format(i, sum_mark))
+                if sum_mark<min_mark:
                     index_mark = i
 
-        return int(index_mark+length_mark/2)
+            #bo sung, tinh lai index
+            
+            index = index_mark
+            min_index = arr[int(index_mark)]['value']
+            for i in range(int(index_mark), int(index_mark+length_mark)):
+                if arr[i]['value']<min_index:
+                    min_index=arr[i]['value']
+                    index=i
+            
+            arr_index_min = []
+            length_arr_index_min = 0
+            for i in range(int(index_mark), int(index_mark+length_mark)):
+                if arr[i]['value']==min_index:
+                    arr_index_min.append(i)
+                    length_arr_index_min+=1
+            
 
-    def calc_keyframe_diff_med(self, sframe_id, eframe_id):
+        #return  int(index_mark+length_mark/2)
+        #return int(index)
+        if int(arr_index_min[int(length_arr_index_min/2)]) > 0:
+            return int(arr_index_min[int(length_arr_index_min/2)])
+        return 1
+
+    #--------------------------------------------------------------------------------------------#
+
+    def calc_keyframe_diff_med_avg(self, sframe_id, eframe_id):
+        if eframe_id<= sframe_id:
+            return int(sframe_id)
         arr = self.diff_queue.get()
         arr.reverse()
         total = 0
         temp = 0
         index_diff = sframe_id
-        print("start = {} end = {}".format(sframe_id, eframe_id))
-        for num in range(int(sframe_id), int(eframe_id+1)):
-            total += arr[num]['value']
-
+        print("----------------------- start = {} end = {} thred = {}----------------------".format(sframe_id, eframe_id, self.threshold))
+        for num in range(int(sframe_id),int(eframe_id+1)):
+            total+=arr[num]['value']
+            #print("{}".format(arr[num]['value']))
+        
         avg = total/(eframe_id-sframe_id+1)
         print("total = {} avg = {}".format(total, avg))
 
         list_diff_avg = []
 
-        for i in range(int(sframe_id), int(eframe_id+1)):
+        for i in range(int(sframe_id),int(eframe_id+1)):
             list_diff_avg.append(abs(avg-arr[i]['value']))
 
         min_diff_avg = list_diff_avg[0]
-        for i in range(int(0), int(eframe_id-sframe_id)):
-            if list_diff_avg[i] < min_diff_avg:
+        for i in range(int(0),int(eframe_id-sframe_id)):
+            if list_diff_avg[i]<min_diff_avg:
                 min_diff_avg = list_diff_avg[i]
                 index_diff = i
 
@@ -256,12 +308,35 @@ class ShotBoundaryDetector(object):
         list_index_min_diff_avg = []
         length_list_index_min_diff_avg = 0
 
-        for i in range(int(0), int(eframe_id-sframe_id)):
-            if list_diff_avg[i] == min_diff_avg:
+        for i in range(int(0),int(eframe_id-sframe_id)):
+            if list_diff_avg[i]==min_diff_avg:
                 list_index_min_diff_avg.append(i)
-                length_list_index_min_diff_avg += 1
+                length_list_index_min_diff_avg+=1
 
-        return int(list_index_min_diff_avg[int(length_list_index_min_diff_avg/2)]+sframe_id)
+        if int(list_index_min_diff_avg[int(length_list_index_min_diff_avg/2)]+sframe_id) > 0 :
+            return int(list_index_min_diff_avg[int(length_list_index_min_diff_avg/2)]+sframe_id)
+        return 1
+
+    #--------------------------------------------------------------------------------------------#
+
+    def calc_keyframe_diff_mod(self, sframe_id, eframe_id):
+        if eframe_id<= sframe_id:
+            return int(sframe_id)
+        arr = self.diff_queue.get()
+        arr.reverse()
+        total = 0
+        temp = 0
+        index_diff = sframe_id
+        print("----------------------- start = {} end = {} thred = {}----------------------".format(sframe_id, eframe_id, self.threshold))
+        for num in range(int(sframe_id),int(eframe_id+1)):
+            total+=arr[num]['value']
+            #print("{}".format(arr[num]['value']))
+
+        for num in range(int(sframe_id),int(eframe_id+1)):
+            temp+=arr[num]['value']
+            if(temp>total/2):
+                return num
+
 
     def get_list_keyframes_index(self, boundary_queue, algorithm=2):
         """
@@ -284,7 +359,7 @@ class ShotBoundaryDetector(object):
                 index = int(
                     self.calc_keyframe_diff_min_mark(sframe_id, eframe_id))
             else:
-                index = int(self.calc_keyframe_diff_med(sframe_id, eframe_id))
+                index = int(self.calc_keyframe_diff_med_avg(sframe_id, eframe_id))
             list_index.append(index)
             i += 1
             print("Key Frame : {}" . format(index))
@@ -441,4 +516,4 @@ class ShotBoundaryDetector(object):
 
         self.save_keyframes(list_index)
         self.save_shots(list_shots)
-        return list_index, diffs
+        return list_index, diffs, self.threshold

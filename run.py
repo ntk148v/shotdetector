@@ -21,7 +21,7 @@ def allowed_file(filename):
 @app.route("/detect/<filename>/<int:algorithm>/<int:threshold>/<int:method>")
 def detect(filename, algorithm, threshold, method):
     detector = ShotBoundaryDetector(config.UPLOAD_DIR + filename)
-    list_index, diff_queue = detector.detect(algorithm, threshold, method)
+    list_index, diff_queue, threshold = detector.detect(algorithm, threshold, method)
     list_images = []
     for index in list_index:
         list_images.append(
@@ -32,7 +32,7 @@ def detect(filename, algorithm, threshold, method):
     for value in diff_queue:
         list_diff.append([i, value['value']])
         i = i + 1
-    return render_template('detect.html', list_images=list_images, list_diff=list_diff)
+    return render_template('detect.html', list_images=list_images, list_diff=list_diff, threshold=threshold)
 
 
 @app.route("/", methods=['GET', 'POST'])
